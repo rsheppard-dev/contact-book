@@ -1,18 +1,22 @@
-import { object, string } from 'yup';
+import * as yup from 'yup';
 
-const userSchema = object({
-	firstName: string()
+const userSchema = yup.object({
+	firstName: yup
+		.string()
 		.min(2, 'First name must be at least 2 characters long.')
 		.max(50, 'First name must not exceed 50 characters.')
 		.required('First name is required.'),
-	lastName: string()
+	lastName: yup
+		.string()
 		.min(2, 'Last name must be at least 2 characters long.')
 		.max(50, 'Last name must not exceed 50 characters.')
 		.required('Last name is required.'),
-	email: string()
+	email: yup
+		.string()
 		.email('You must enter a valid email!')
 		.required('Email is required.'),
-	password: string()
+	password: yup
+		.string()
 		.required('Password is required.')
 		.min(8, 'Password must be at least 8 characters long.')
 		.test({
@@ -35,6 +39,9 @@ const userSchema = object({
 				return true;
 			},
 		}),
+	confirmPassword: yup
+		.string()
+		.oneOf([yup.ref('password'), ''], 'Passwords do not match.'),
 });
 
 export default userSchema;

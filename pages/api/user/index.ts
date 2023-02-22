@@ -31,21 +31,21 @@ export default async function handler(
 	// post: /api/user
 	if (req.method === 'POST') {
 		// get data from user
-		const user: IUser = req.body;
+		const data: IUser = req.body;
 
 		try {
 			// validate user
-			await userSchema.validate(user);
+			await userSchema.validate(data);
 
 			// hash password
-			const hashedPassword = hashSync(user.password, 10);
+			const hashedPassword = hashSync(data.password, 10);
 
 			// add new user to database
-			await prisma.user.create({
+			const user = await prisma.user.create({
 				data: {
-					firstName: user.firstName,
-					lastName: user.lastName,
-					email: user.email,
+					firstName: data.firstName,
+					lastName: data.lastName,
+					email: data.email,
 					password: hashedPassword,
 				},
 			});

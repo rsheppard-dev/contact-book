@@ -1,36 +1,41 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 import { prisma } from '../../../prisma/client';
+import nc from 'next-connect';
 import { compare } from 'bcrypt';
 import { sign } from 'jsonwebtoken';
 
-import exclude from '@/lib/exclude';
 import IUser from '@/interfaces/IUser';
 
-export default async function handler(
-	req: NextApiRequest,
-	res: NextApiResponse
-) {
+const handler = nc<NextApiRequest, NextApiResponse>({
+	onError: (err, req, res, next) => {
+		console.error(err.stack);
+		res.status(500).end('Sorry, something went wrong!');
+	},
+	onNoMatch: (req, res) => {
+		res.status(404).end('Sorry, that page was not found!');
+	},
+})
 	// post: /api/user/login
-	if (req.method === 'POST') {
+	.post(async (req, res) => {
 		// get data from user
-		const user: IUser = req.body;
+		const { email, password }: IUser = req.body;
 
 		try {
-			// find user account
-			const currentUser = await prisma.user.findUniqueOrThrow({
+			// find user or throw error if not found
+			const user = await prisma.user.findUniqueOrThrow({
 				where: {
-					email: user.email,
+					email,
 				},
 			});
 
 			// check password is correct
-			compare(user.password, currentUser.password, function (err, result) {
+			compare(password, user.password, function (err, result) {
 				if (!err && result) {
-					// generate jwt token
+					// generate jwt
 					const data = {
-						id: currentUser.id,
-						email: currentUser.email,
+						id: user.id,
+						email: user.email,
 					};
 					const secret = process.env.JWT_SECRET!;
 					const token = sign(data, secret);
@@ -40,8 +45,9 @@ export default async function handler(
 					res.status(401).send({ message: 'Failed to authenticate user.' });
 				}
 			});
-		} catch (error: any) {
+		} catch (error) {
 			res.status(500).send({ message: 'Sorry, something went wrong.' });
 		}
-	}
-}
+	});
+
+export default handler;
