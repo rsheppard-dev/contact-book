@@ -4,6 +4,7 @@ import { useId } from 'react';
 
 import { useFormik } from 'formik';
 import axios from 'axios';
+import { signIn } from 'next-auth/react';
 
 export default function LoginForm() {
 	const id = useId();
@@ -22,14 +23,12 @@ export default function LoginForm() {
 			password: '',
 		},
 		onSubmit: async values => {
-			try {
-				await axios.post('/api/user/login', {
-					email: values.email,
-					password: values.password,
-				});
-			} catch (e) {
-				console.log(e);
-			}
+			const res = await signIn('credentials', {
+				email: values.email,
+				password: values.password,
+				redirect: false,
+			});
+			console.log(res);
 		},
 	});
 	return (

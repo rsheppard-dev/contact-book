@@ -1,6 +1,7 @@
 import './globals.css';
 
-import Navbar from '@/components/navbar';
+import Navbar from './components/Navbar';
+import Providers from './providers';
 
 export default function RootLayout({
 	children,
@@ -9,14 +10,12 @@ export default function RootLayout({
 }) {
 	return (
 		<html lang='en'>
-			{/*
-        <head /> will contain the components returned by the nearest parent
-        head.tsx. Find out more at https://beta.nextjs.org/docs/api-reference/file-conventions/head
-      */}
 			<head />
 			<body>
-				<Navbar />
-				{children}
+				<Providers>
+					<Navbar />
+					<main>{children}</main>
+				</Providers>
 			</body>
 		</html>
 	);

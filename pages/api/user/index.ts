@@ -1,33 +1,14 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import { NextApiRequest, NextApiResponse } from 'next';
 
-import { Prisma } from '@prisma/client';
-import { prisma } from '../../../prisma/client';
-import { hashSync } from 'bcrypt';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
+import { hash } from 'bcrypt';
 
-import exclude from '@/lib/exclude';
 import IUser from '@/interfaces/IUser';
+import exclude from '@/lib/exclude';
 import userSchema from '@/schema/userSchema';
+import client from '@/prisma/client';
 
-export default async function handler(
-	req: NextApiRequest,
-	res: NextApiResponse
-) {
-	// get: /api/user
-	if (req.method === 'GET') {
-		try {
-			const data = await prisma.user.findMany();
-
-			// remove password before sending back to client
-			data.forEach(user => {
-				exclude(user, ['password']);
-			});
-
-			res.status(200).send(data);
-		} catch (error) {
-			res.status(500).send(error);
-		}
-	}
-
+async function handler(req: NextApiRequest, res: NextApiResponse) {
 	// post: /api/user
 	if (req.method === 'POST') {
 		// get data from user
@@ -35,16 +16,15 @@ export default async function handler(
 
 		try {
 			// validate user
-			await userSchema.validate(data);
+			userSchema.validate(data);
 
 			// hash password
-			const hashedPassword = hashSync(data.password, 10);
+			const hashedPassword = await hash(data.password, 10);
 
 			// add new user to database
-			const user = await prisma.user.create({
+			const user = await client.user.create({
 				data: {
-					firstName: data.firstName,
-					lastName: data.lastName,
+					name: `${data.firstName} ${data.lastName}`,
 					email: data.email,
 					password: hashedPassword,
 				},
@@ -56,7 +36,7 @@ export default async function handler(
 			res.status(200).send(userWithoutPassword);
 		} catch (error: any) {
 			// check email is unique
-			if (error instanceof Prisma.PrismaClientKnownRequestError) {
+			if (error instanceof PrismaClientKnownRequestError) {
 				if (error.code === 'P2002') {
 					res.status(400).send({
 						message: 'A new user cannot be created with this email.',
@@ -73,3 +53,5 @@ export default async function handler(
 		}
 	}
 }
+
+export default handler;

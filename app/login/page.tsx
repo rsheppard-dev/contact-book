@@ -1,6 +1,6 @@
 import { Poppins } from '@next/font/google';
 
-import LoginForm from '@/components/LoginForm';
+import LoginForm from '@/app/components/LoginForm';
 
 const inter = Poppins({ subsets: ['latin'], weight: ['400'] });
 
