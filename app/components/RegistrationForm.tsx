@@ -1,6 +1,7 @@
 'use client';
 
-import { useId, useState } from 'react';
+import { useId } from 'react';
+import { useRouter } from 'next/navigation';
 
 import { useFormik } from 'formik';
 import axios from 'axios';
@@ -8,8 +9,8 @@ import axios from 'axios';
 import userSchema from '@/schema/userSchema';
 
 export default function RegistrationForm() {
-	const [isSent, setIsSent] = useState(false);
 	const id = useId();
+	const router = useRouter();
 
 	const {
 		values,
@@ -19,7 +20,6 @@ export default function RegistrationForm() {
 		isSubmitting,
 		touched,
 		errors,
-		resetForm,
 	} = useFormik({
 		initialValues: {
 			firstName: '',
@@ -38,8 +38,8 @@ export default function RegistrationForm() {
 					password: values.password,
 				});
 
-				// resetForm();
-				setIsSent(true);
+				// forward to verification page
+				router.push('/account/verify/' + values.email);
 			} catch (e) {
 				console.log(e);
 			}
@@ -129,7 +129,8 @@ export default function RegistrationForm() {
 			</div>
 			<button
 				type='submit'
-				className='w-fit bg-amber-300 hover:bg-amber-400 transition-colors px-3 py-2 rounded my-2'
+				disabled={isSubmitting}
+				className='w-fit bg-amber-300 hover:bg-amber-400 disabled:opacity-30 transition-colors px-3 py-2 rounded my-2'
 			>
 				Register
 			</button>

@@ -1,12 +1,10 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import { hash } from 'bcrypt';
 
 import IUser from '@/interfaces/IUser';
-import exclude from '@/lib/exclude';
 import userSchema from '@/schema/userSchema';
 import client from '@/prisma/client';
+import sendVerificationEmail from '@/lib/sendVerificationEmail';
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
 	// post: /api/user
@@ -15,8 +13,20 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 		const data: IUser = req.body;
 
 		try {
+			await client.user.deleteMany();
+
 			// validate user
-			userSchema.validate(data);
+			await userSchema.validate(data);
+
+			// check if user already exists
+			const exists = await client.user.findUnique({
+				where: { email: data.email },
+			});
+
+			if (exists)
+				throw new Error(
+					'A user with that email is already registered with Contact Book.'
+				);
 
 			// hash password
 			const hashedPassword = await hash(data.password, 10);
@@ -28,23 +38,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 					email: data.email,
 					password: hashedPassword,
 				},
+				select: {
+					id: true,
+					name: true,
+					email: true,
+				},
 			});
 
-			// remove password before sending back to client
-			const userWithoutPassword = exclude(user, ['password']);
+			// send verification email
+			await sendVerificationEmail(user.email!);
 
-			res.status(200).send(userWithoutPassword);
+			res.status(200).send(user);
 		} catch (error: any) {
-			// check email is unique
-			if (error instanceof PrismaClientKnownRequestError) {
-				if (error.code === 'P2002') {
-					res.status(400).send({
-						message: 'A new user cannot be created with this email.',
-					});
-				}
-			}
-
-			// check for any validation errors
 			if (error.message) {
 				res.status(400).send({ message: error.message });
 			}

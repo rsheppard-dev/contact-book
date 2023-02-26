@@ -1,13 +1,16 @@
 'use client';
 
 import { useId } from 'react';
+import { useSearchParams } from 'next/navigation';
 
 import { useFormik } from 'formik';
-import axios from 'axios';
 import { signIn } from 'next-auth/react';
 
 export default function LoginForm() {
 	const id = useId();
+	const searchParams = useSearchParams();
+
+	const email = searchParams.get('email') as string | undefined;
 
 	const {
 		values,
@@ -41,6 +44,7 @@ export default function LoginForm() {
 					id={id + '-email'}
 					onChange={handleChange}
 					value={values.email}
+					defaultValue={email}
 				/>
 			</div>
 			<div className='flex flex-col gap-2'>

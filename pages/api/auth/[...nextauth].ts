@@ -7,9 +7,7 @@ import { compare } from 'bcrypt';
 
 export default NextAuth({
 	adapter: PrismaAdapter(client),
-	session: {
-		strategy: 'jwt',
-	},
+	session: { strategy: 'jwt' },
 	providers: [
 		CredentialsProvider({
 			type: 'credentials',
@@ -25,7 +23,6 @@ export default NextAuth({
 			},
 			async authorize(credentials, req) {
 				if (!credentials) throw new Error();
-				// Add logic here to look up the user from the credentials supplied
 				const user = await client.user.findUniqueOrThrow({
 					where: {
 						email: credentials?.email,
@@ -33,18 +30,18 @@ export default NextAuth({
 				});
 
 				if (user) {
-					if (user.password === null) throw new Error('No password set!');
-
-					// check password
+					// check password matches password in database
 					const match = await compare(credentials.password, user.password!);
-
 					if (!match) throw new Error('Email or password are incorrect.');
 
-					// Any object returned will be saved in `user` property of the JWT
+					// check user's email is verified before allowing to log in.
+					if (!user.emailVerified) {
+						throw new Error('Email not verified.');
+					}
+
 					return user;
 				}
 
-				// If you return null then an error will be displayed advising the user to check their details.
 				throw new Error('Invalid credentials.');
 			},
 		}),
@@ -54,6 +51,6 @@ export default NextAuth({
 		}),
 	],
 	pages: {
-		signIn: '/login',
+		signIn: '/account/login',
 	},
 });

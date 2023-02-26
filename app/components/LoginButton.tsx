@@ -17,7 +17,7 @@ export default function LoginButton() {
 	}
 	return (
 		<div className='flex gap-2'>
-			<Link href='/register'>Register</Link>
+			<Link href='/account/register'>Register</Link>
 			<div>|</div>
 			<button onClick={() => signIn()}>Login</button>
 		</div>
