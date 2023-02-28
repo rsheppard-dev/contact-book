@@ -23,7 +23,8 @@ export default NextAuth({
 			},
 			async authorize(credentials, req) {
 				if (!credentials) throw new Error();
-				const user = await client.user.findUniqueOrThrow({
+
+				const user = await client.user.findUnique({
 					where: {
 						email: credentials?.email,
 					},
@@ -34,7 +35,7 @@ export default NextAuth({
 					const match = await compare(credentials.password, user.password!);
 					if (!match) throw new Error('Email or password are incorrect.');
 
-					// check user's email is verified before allowing to log in.
+					// check user's email is verified before allowing them to log in.
 					if (!user.emailVerified) {
 						throw new Error('Email not verified.');
 					}

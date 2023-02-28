@@ -34,8 +34,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 			});
 
 			// forward user to login page
-			res.redirect(`/account/login?email=${user.email}`).end();
-		} catch (error: any) {
+			res.redirect('/account/login');
+		} catch (err) {
+			const error = err as ApiError;
+
 			if (error.message) {
 				res.status(400).send({ message: error.message });
 			}

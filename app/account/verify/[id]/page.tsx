@@ -8,34 +8,36 @@ const inter = Poppins({ subsets: ['latin'], weight: ['400'] });
 export default async function VerifyEmail({
 	params,
 }: {
-	params: { email: string };
+	params: { id: string };
 }) {
 	let error = '';
-	const email = decodeURIComponent(params.email);
+	const id = decodeURIComponent(params.id);
 
 	const user = await client.user.findUnique({
-		where: { email },
-		select: { email: true, emailVerified: true },
+		where: { id },
+		select: { id: true, email: true, emailVerified: true },
 	});
 
 	const verified = user?.emailVerified ? true : false;
 
-	if (!user) error = `No registered account found with the email, ${email}.`;
-	if (verified)
-		error = 'Your email has already been verified for this account.';
+	// check for errors
+	if (!user) error = 'Unable to find a user with those details.';
+	if (verified) error = 'Your email has already been verified on this account.';
 
 	if (!error) {
 		return (
 			<section className='container'>
 				<h1>
-					Please check your email. A verification link has been sent to {email}.
-					You will need to open the link to activate your accont.
+					Please check your email. A verification link has been sent to{' '}
+					{user?.email}. You will need to open the link to activate your accont.
 				</h1>
 
-				<VerificationButton email={email} />
+				<VerificationButton email={user?.email!} />
 			</section>
 		);
 	}
+
+	// display error message if something went wrong
 	return (
 		<section className='container'>
 			<h1>{error}</h1>

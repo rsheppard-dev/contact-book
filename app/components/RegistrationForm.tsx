@@ -31,7 +31,9 @@ export default function RegistrationForm() {
 		validationSchema: userSchema,
 		onSubmit: async values => {
 			try {
-				await axios.post('/api/user', {
+				const {
+					data: { id },
+				} = await axios.post('/api/user', {
 					firstName: values.firstName,
 					lastName: values.lastName,
 					email: values.email,
@@ -39,7 +41,7 @@ export default function RegistrationForm() {
 				});
 
 				// forward to verification page
-				router.push('/account/verify/' + values.email);
+				router.push('/account/verify/' + id);
 			} catch (e) {
 				console.log(e);
 			}

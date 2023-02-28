@@ -1,10 +1,12 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { hash } from 'bcrypt';
+import { ApiError } from 'next/dist/server/api-utils';
 
 import IUser from '@/interfaces/IUser';
 import userSchema from '@/schema/userSchema';
 import client from '@/prisma/client';
 import sendVerificationEmail from '@/lib/sendVerificationEmail';
+
+import { hash } from 'bcrypt';
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
 	// post: /api/user
@@ -49,7 +51,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 			await sendVerificationEmail(user.email!);
 
 			res.status(200).send(user);
-		} catch (error: any) {
+		} catch (err) {
+			const error = err as ApiError;
+
 			if (error.message) {
 				res.status(400).send({ message: error.message });
 			}

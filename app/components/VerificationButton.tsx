@@ -32,19 +32,13 @@ export default function VerificationButton({ email }: { email: string }) {
 
 	if (email) {
 		return (
-			<div>
-				<p>
-					If you do not receive an email you can request another email below.
-				</p>
-
-				<button
-					type='button'
-					onClick={handleClick}
-					className='w-fit bg-amber-300 hover:bg-amber-400 disabled:opacity-30 transition-colors px-3 py-2 rounded my-2'
-				>
-					Resend verifaction email
-				</button>
-			</div>
+			<button
+				type='button'
+				onClick={handleClick}
+				className='w-fit text-sm font-bold text-sky-900 bg-sky-300 hover:bg-sky-400 disabled:opacity-30 transition-colors px-3 py-2 rounded my-2'
+			>
+				Resend verification email
+			</button>
 		);
 	} else {
 		return <div></div>;
