@@ -12,6 +12,9 @@ export default function LoginForm() {
 	const router = useRouter();
 	const [errorMessage, setErrorMessage] = useState('');
 
+	if (errorMessage === 'data and hash arguments required') {
+		setErrorMessage('User account is not linked to credentials.');
+	}
 	const {
 		values,
 		handleBlur,
@@ -71,7 +74,14 @@ export default function LoginForm() {
 				</button>
 			</form>
 
-			{errorMessage === 'Email not verified.' ? (
+			{errorMessage ? (
+				<div role='alert' className='mt-2 bg-red-100 px-4 py-2'>
+					{errorMessage}
+				</div>
+			) : null}
+
+			{errorMessage ===
+			'You must verify your email address to activate your account.' ? (
 				<VerificationButton email={values.email} />
 			) : null}
 		</>

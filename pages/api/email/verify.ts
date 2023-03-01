@@ -4,7 +4,7 @@ import { ApiError } from 'next/dist/server/api-utils';
 import sendVerificationEmail from '@/lib/sendVerificationEmail';
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
-	// get: /api/email/verify/:email
+	// get: /api/email/verify?email=[email]
 	if (req.method === 'GET') {
 		const email = req.query.email as string;
 

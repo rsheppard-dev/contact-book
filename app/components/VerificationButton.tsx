@@ -41,6 +41,6 @@ export default function VerificationButton({ email }: { email: string }) {
 			</button>
 		);
 	} else {
-		return <div></div>;
+		return <></>;
 	}
 }

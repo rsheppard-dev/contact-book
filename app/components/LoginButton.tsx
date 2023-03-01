@@ -9,7 +9,7 @@ export default function LoginButton() {
 	if (session) {
 		return (
 			<div className='flex gap-2'>
-				<div>{session?.user?.name}</div>
+				<Link href='/account'>{session?.user?.name}</Link>
 				<div>|</div>
 				<button onClick={() => signOut()}>Logout</button>
 			</div>
